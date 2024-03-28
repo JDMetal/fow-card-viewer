@@ -1,0 +1,83 @@
+#leftContainer {
+  flex: 1;
+  padding: 10px;
+  /* border-right: 1px solid #ddd; */
+}
+
+#rightContainer {
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: top  ;
+  padding: 10px;
+}
+
+.scrollcards {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 95%;
+}
+
+.container {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  display: flex;
+}
+
+.thumbnail {
+  flex-wrap: wrap;
+  height: 90vh;
+  align-items: center;
+  justify-content: left;
+  margin-bottom: 10px;
+}
+
+.thumbnail img {
+  max-width: 70px;
+  max-height: 70px;
+  margin-right: 10px;
+}
+
+.containerImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#displayedImage {
+  padding: 10px;
+  max-width: 75%;
+  max-height: 75%;
+}
+
+  /* width */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #999999;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #999999;
+  }
+
+  br {
+    display: block; /* makes it have a width */
+    content: ""; /* clears default height */
+    margin-top: 10px; /* change this to whatever height you want it */
+}
