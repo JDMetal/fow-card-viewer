@@ -13,7 +13,6 @@ function App() {
   useEffect(() => {
     const endpoint = process.env.SERVER_BASE + '/cards';
     const bearerToken = process.env.AUTH;
-  
     fetch(endpoint, {
       method: 'GET',
       headers: {
@@ -23,6 +22,7 @@ function App() {
     })
     .then(response => response.json())
     .then(data => {
+      console.log(data)
       setCards(data);
       setTotalPages(Math.ceil(data.length / itemsPerPage));
     })
@@ -31,7 +31,7 @@ function App() {
 
   useEffect(() => {
     const filteredCards = (cards.map((a)=> {
-      return (a.Title as string).toLocaleLowerCase().includes(text) ? a : undefined
+      return (a.name as string).toLocaleLowerCase().includes(text) ? a : undefined
     }))
     const filteredArr = filteredCards.filter(item => item !== undefined);
 
@@ -56,7 +56,7 @@ function App() {
 
   useEffect(() => {
     const filteredCards = (cards.map((a)=> {
-      return (a.Title as string).toLocaleLowerCase().includes(text) ? a : undefined
+      return (a.name as string).toLocaleLowerCase().includes(text) ? a : undefined
     }))
     const filteredArr = filteredCards.filter(item => item !== undefined);
     setDisplayCards(filteredArr)
@@ -80,8 +80,8 @@ function App() {
         {displayCards.map((card: any) => {
           return (
             <div onClick={() => onCardClick(card)} style={{display: 'flex'}}>
-              <img src={card.src}/>
-              <span>{card.Title}</span>
+              <img src={card.image}/>
+              <span>{card.name}</span>
             </div>
             )
         })}
@@ -100,8 +100,8 @@ function App() {
       <div id="rightContainer">
         {selectedCard && 
         <div className='containerImage'>
-          <img id="displayedImage" src={selectedCard.src}/>
-          <a style={{fontSize: '24px', color: 'rgba(255, 255, 255, 0.87)', fontWeight: 600}}>{selectedCard.Title}</a>
+          <img id="displayedImage" src={selectedCard.image}/>
+          <a style={{fontSize: '24px', color: 'rgba(255, 255, 255, 0.87)', fontWeight: 600}}>{selectedCard.name}</a>
           <a style={{fontStyle: 'italic',fontSize: '18px', color: 'rgba(255, 255, 255, 0.87)'}}>{selectedCard.cardType}</a>
           <div style={{marginTop: '5px'}} dangerouslySetInnerHTML={{ __html:  selectedCard.cardText }}></div>
         </div>
