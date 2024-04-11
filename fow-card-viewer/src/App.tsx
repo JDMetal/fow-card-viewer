@@ -75,8 +75,11 @@ function App() {
   return (
     <div className="container">
       {isLoading ? (
-        <div></div>
-      ) : (
+        <div className="loader-container">
+        {/* Replace this div with your spinner or loader component */}
+        <div className="loader"></div>
+      </div>
+        ) : (
         <div id="leftContainer">
           <div className="thumbnail">
             <div style={{ display: "flex", justifyContent: "space-between" }}>
