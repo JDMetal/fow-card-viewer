@@ -1,7 +1,7 @@
 {
   "name": "card-viewer-fow",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "dev": "npm run copy-assets && vite",
     "build": "tsc && vite build && electron-builder && npm run copy-assets",
