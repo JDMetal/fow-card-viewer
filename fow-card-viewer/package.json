@@ -1,13 +1,14 @@
 {
   "name": "card-viewer-fow",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.3",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "dev": "npm run copy-assets && vite",
+    "build": "tsc && vite build && electron-builder && npm run copy-assets",
     "package": "cp env-prod.json src/env.json && npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "copy-assets": "copyfiles -u 1 src/assets/* dist-electron"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -24,6 +25,7 @@
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "@vitejs/plugin-react": "^4.0.4",
+    "copyfiles": "^2.4.1",
     "electron": "^26.1.0",
     "electron-builder": "^24.6.4",
     "eslint": "^8.48.0",

@@ -1,47 +1,78 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import { ipcRenderer } from "electron";
 
 function App() {
   const [cards, setCards] = useState<any[]>([]);
   const [text, setText] = useState<string>("");
   const [displayCards, setDisplayCards] = useState<any[]>([]);
-  const [selectedCard, setSelectedCard] = useState<any>({});
+  const [selectedCard, setSelectedCard] = useState<any | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 20;
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Added loading state
 
   useEffect(() => {
-    setIsLoading(true); // Start loading
-    const endpoint = process.env.SERVER_BASE + "/cards";
-    const bearerToken = process.env.AUTH;
-    fetch(endpoint, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setCards(data);
-        setTotalPages(Math.ceil(data.length / itemsPerPage));
-      })
-      .catch((error) => console.error("❌ Error fetching cards:", error))
-      .finally(() => setIsLoading(false)); // Stop loading irrespective of success or failure
+    try {
+      setIsLoading(true);
+      const islocal = process.env.ISLOCAL;
+      if (islocal === "FALSE") {
+        const endpoint = process.env.SERVER_BASE + "/cards";
+        const bearerToken = process.env.AUTH;
+        fetch(endpoint, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setCards(data);
+            setTotalPages(Math.ceil(data.length / itemsPerPage));
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            console.error("❌ Error fetching cards:", error);
+            setIsLoading(false); // Stop loading
+          });
+      } else {
+          ipcRenderer.on("load-json", (_event, cards) => {
+            let parsedcards = cards.map((card: any) => {
+              return {
+                id: card.cardId,
+                name: card.Title,
+                cardText: card.cardText,
+                cardType: card.cardType,
+                image: card.src
+              };
+            }) 
+            setCards(parsedcards);
+            setTotalPages(Math.ceil(parsedcards.length / itemsPerPage));
+            setIsLoading(false);
+          });
+      }
+    } catch (error) {
+      console.error("Error occurred during useEffect execution:", error);
+    }
   }, []);
 
   useEffect(() => {
     const filteredCards = cards.map((a) => {
-      return (a.name as string).toLocaleLowerCase().includes(text)
+      return (a.name as string).toLocaleLowerCase().includes(text) ||
+        (a.cardText as string).toLocaleLowerCase().includes(text) ||
+        (a.id as string).toLocaleLowerCase().includes(text)
         ? a
         : undefined;
     });
     const filteredArr = filteredCards.filter((item) => item !== undefined);
-
-    setTotalPages(Math.ceil(filteredArr.length / itemsPerPage));
+    // now remove duplicates by id:
+    const totalfilteredArr = filteredArr.filter(
+      (item, idx, self) => idx === self.findIndex((t) => t.id === item.id)
+    );
+    setTotalPages(Math.ceil(totalfilteredArr.length / itemsPerPage));
     setCurrentPage(1);
-    setDisplayCards(filteredArr.slice(0, itemsPerPage));
+    setDisplayCards(totalfilteredArr.slice(0, itemsPerPage));
   }, [text, cards]);
 
   const paginate = (page: number) => {
@@ -58,16 +89,6 @@ function App() {
     setText(newValue);
   };
 
-  useEffect(() => {
-    const filteredCards = cards.map((a) => {
-      return (a.name as string).toLocaleLowerCase().includes(text)
-        ? a
-        : undefined;
-    });
-    const filteredArr = filteredCards.filter((item) => item !== undefined);
-    setDisplayCards(filteredArr);
-  }, [text]);
-
   const onCardClick = (card: any) => {
     setSelectedCard(card);
   };
@@ -76,10 +97,10 @@ function App() {
     <div className="container">
       {isLoading ? (
         <div className="loader-container">
-        {/* Replace this div with your spinner or loader component */}
-        <div className="loader"></div>
-      </div>
-        ) : (
+          {/* Replace this div with your spinner or loader component */}
+          <div className="loader"></div>
+        </div>
+      ) : (
         <div id="leftContainer">
           <div className="thumbnail">
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -93,13 +114,14 @@ function App() {
               </button>
             </div>
             <div className="scrollcards">
-              {displayCards.map((card: any) => {
+              {displayCards.map((card: any, index: number) => {
                 return (
                   <div
+                    key={card.id || index} // Assuming cards have a unique id. If not, you can use `index` temporarily.
                     onClick={() => onCardClick(card)}
                     style={{ display: "flex" }}
                   >
-                    <img src={card.image} />
+                    <img src={card.image} alt={card.name} />
                     <span>{card.name}</span>
                   </div>
                 );
@@ -128,7 +150,11 @@ function App() {
       <div id="rightContainer">
         {selectedCard && (
           <div className="containerImage">
-            <img id="displayedImage" src={selectedCard.image} />
+            <img
+              id="displayedImage"
+              src={selectedCard.image}
+              alt={selectedCard.name}
+            />
             <a
               style={{
                 fontSize: "24px",

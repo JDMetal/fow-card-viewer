@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
+import * as fs from 'fs';
 
 // The built directory structure
 //
@@ -31,7 +32,7 @@ function createWindow() {
     autoHideMenuBar: true,
   })
 
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -44,6 +45,24 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
+
+  // Leer el archivo JSON cuando la ventana esté lista
+  const jsonPath = path.join(__dirname, 'assets', 'cards.json');
+  fs.readFile(jsonPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error al leer el archivo JSON:', err);
+      return;
+    }
+
+    const cards = JSON.parse(data);
+
+    if (win) {
+      // Enviar los datos JSON al renderizador
+      win.webContents.on('did-finish-load', () => {
+        win?.webContents.send('load-json', cards);
+      });
+    }
+  });
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
